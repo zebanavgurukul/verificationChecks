@@ -30,10 +30,12 @@ module.exports = {
                 .verifications
                 .create({
                     to : `+${phone_number}`,
-                    channel : req.query.channel
+                    // channel : req.query.channel
+                    channel : "sms"
                 })
                 .then(result => {
-                    res.json({result});
+                    // res.json(result);
+                    res.json('OTP sent');
                 })
                 .catch(err => {
                     res.json({err});
@@ -44,22 +46,26 @@ module.exports = {
         var phone_number = req.body.phone_number
         UserModel.findOne({phone_number})
         .then((person) => {
-            var phone = person["phone_number"]
-            client
-                .verify
-                .services(config.serviceID)
-                .verificationChecks
-                .create({
-                    to : `+${phone}`,
-                    code : req.query.code
-                })
-                .then((result) => {
-                    res.json(result)
-                    // res.json('..........login successful..........');
-                })
-                .catch(err => {
-                    res.json({err});
-                });
+        var phone = person["phone_number"]
+        client
+            .verify
+            .services(config.serviceID)
+            .verificationChecks
+            .create({
+                to : `+${phone}`,
+                code : req.query.code
+            })
+            .then((result) => {
+                var status = result["status"]
+                if ("approved" == status){
+                    res.json('..........login successful..........');
+                }else{
+                    res.json('OTP is wrong');
+                }
+            })
+            .catch(err => {
+                res.json({err});
+            });
         })
     }
 };
